@@ -8,8 +8,8 @@ void Network::addNode(Neuron* newNode, int layer) {
 	neurons.at(layer).push_back(newNode);
 }
 
-void Network::addLink(Neuron* n1, Neuron* n2) {
-	links.push_back(new Link(n1,n2));
+void Network::addLink(Neuron* n1, Neuron* n2, int layer_inf) {
+	links.at(layer_inf).push_back(new Link(n1,n2));
 }
 
 void Network::addNodes(int number_of_neuron, int layer) {
@@ -26,12 +26,11 @@ void Network::addInputs(int number_of_input) {
 
 void Network::fullLinkage(int layer1, int layer2){
 	for (vector<Neuron*>::iterator node1 = neurons.at(layer1).begin(); node1 != neurons.at(layer1).end(); ++node1) {
-		for (vector<Neuron*>::iterator node2 = neurons.at(layer1).begin(); node2 != neurons.at(layer1).end(); ++node2) {
-			addLink(*node1, *node2);
+		for (vector<Neuron*>::iterator node2 = neurons.at(layer2).begin(); node2 != neurons.at(layer2).end(); ++node2) {
+			addLink(*node1, *node2, layer1);
 		}
 	}
 }
-
 
 void Network::resetSum() {
 	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
@@ -49,36 +48,60 @@ void Network::resetDelta() {
 	}
 }
 
-void Network::compute(vector<double> inputs) {
+void Network::compute(vector<double> &inputs) {
 	resetSum();
 	int i = 0;
 	for (vector<double>::iterator input = inputs.begin(); input != inputs.end(); ++input) {
 		(neurons.at(0).at(i))->addSum(*input);
 		i ++;
 	} 
-	for (vector<Link*>::iterator link = links.begin(); link != links.end(); ++link) {
-		(*link)->compute();
+	for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
+		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
+			(*link)->compute();
+		}
 	}
 }
 
-void Network::backpropagation(vector< vector<double> > inputs, vector< vector<double> > targets) {
-	double error = TOLERATE_ERROR;
-	while (error >= TOLERATE_ERROR) {
+void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets) {
+	double error = 0;
+	double pasterror = TOLERATE_ERROR;
+	int tour = 0;
+	while (fabs(pasterror - error) >= TOLERATE_ERROR && tour <= 20) {
+		pasterror = error;
+		error = 0;
+		tour++;
+		int image = 0;
 		for (vector< vector<double> >::iterator input = inputs.begin(); input != inputs.end(); ++input) {
 			resetDelta();
 			compute(*input);
 			int number_output = 0;
 			for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
-				double delta = (*output)->getResult() - targets.at(number_output).at(number_output);
+				double delta = (*output)->getResult() - targets.at(image).at(number_output);
 				(*output)->addDelta(delta);
 				number_output ++;
 				error += pow(delta, 2);
 			}
 
-			for (vector<Link*>::iterator link = links.begin(); link != links.end(); ++link) {
-				(*link)->back();
+			for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
+				for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
+					(*link)->back();
+				}
 			}
+
+			image ++;
+			printf("%d -- %d / %d\n", tour, image, inputs.size());
+
+
 		}
-		printf("%f\n", error);
+		printf("-- > %f\n", error);
+	}
+}
+
+void Network::print() {
+	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
+		for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
+			printf("%f ", (*node)->getResult());
+		}
+		printf("\n - \n");
 	}
 }

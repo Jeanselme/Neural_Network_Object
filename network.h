@@ -1,11 +1,13 @@
 #ifndef __NETWORK_H
 #define __NETWORK_H
+
 #include "link.h"
 #include "node.h"
 #include <vector>
 #include <math.h>
 #include <stdio.h>
 #include <assert.h>
+
 using namespace std;
 
 #define TOLERATE_ERROR 0.1
@@ -18,7 +20,7 @@ protected:
 	// Vector of neurons organised by layer
 	vector< vector<Neuron*> > neurons;
 	// Vector of links
-	vector<Link*> links;
+	vector< vector<Link*> > links;
 	
 public:
 	Network(int number_of_layer) {
@@ -31,7 +33,7 @@ public:
 
 	void addNode(Neuron* newNode, int layer);
 
-	void addLink(Neuron* n1, Neuron* n2);
+	void addLink(Neuron* n1, Neuron* n2, int layer_inf);
 
 	void addNodes(int number_of_neuron, int layer);
 
@@ -43,9 +45,11 @@ public:
 
 	void resetDelta();
 
-	void compute(vector<double> inputs);
+	void compute(vector<double> &inputs);
 
-	void backpropagation(vector< vector<double> > inputs, vector< vector<double> > targets);
+	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets);
+
+	void print();
 };
 
 #endif

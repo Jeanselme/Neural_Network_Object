@@ -1,11 +1,12 @@
 CC = g++
 
-GFLAG = -O2
+GFLAG = -O3 -Wall -Wextra -g
 
 EXEC = handwritten_recognition
 
 SRC = $(wildcard *.cpp)
-OBJ = network.o handwritten_recognition.o
+OBJ = activation.o network.o extraction.o $(EXEC).o
+
 
 all:  $(OBJ)
 	$(CC) $(OBJ) $(GFLAG) -o $(EXEC)
@@ -17,4 +18,6 @@ run:
 	$(CC) -c $<  $(GFLAG)
 
 clean:
-	rm -f *.o
+	rm -f *.o *.gch
+
+full: clean all run

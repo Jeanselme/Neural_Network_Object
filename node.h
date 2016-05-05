@@ -1,5 +1,6 @@
 #ifndef __NODE_H
 #define __NODE_H
+
 #include "activation.h"
 
 class Neuron {
@@ -17,7 +18,7 @@ public:
 		delta = 0;
 	};
 	
-	double getResult() {
+	virtual double getResult() {
 		return functionSigmoid(sumPrevious);
 	};
 
