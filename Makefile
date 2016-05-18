@@ -5,8 +5,9 @@ GFLAG = -O3 -Wall -Wextra -DSTOCHASTIC
 
 EXEC = handwritten_recognition
 
-SRC = $(wildcard *.cpp)
-OBJ = activation.o network.o extraction.o $(EXEC).o
+SRCNET= $(wildcard Network/*.cpp)
+SRCEXT= $(wildcard Extraction/*.cpp)
+OBJ= $(SRCNET:%.cpp=%.o) $(SRCEXT:%.cpp=%.o) $(EXEC).o
 
 all:  $(OBJ)
 	$(CC) $(OBJ) $(GFLAG) -o $(EXEC)
@@ -15,9 +16,9 @@ run:
 	./$(EXEC)
 
 %.o: %.cpp
-	$(CC) -c $<  $(GFLAG)
+	$(CC) -c $<  $(GFLAG) -o $@
 
 clean:
-	rm -f *.o *.gch
+	rm -f $(OBJ) $(EXEC)
 
 full: clean all run

@@ -1,6 +1,6 @@
-#include "extraction.h"
-#include "network.h"
-#include "node.h"
+#include "Extraction/extraction.h"
+#include "Network/network.h"
+#include "Network/node.h"
 #include <stdio.h>
 #include <string>
 
