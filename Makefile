@@ -1,12 +1,12 @@
 CC = g++
 
-GFLAG = -O3 -Wall -Wextra -g
+# Delete -DSTOCHASTIC  if a real gradient descent is needed
+GFLAG = -O3 -Wall -Wextra -DSTOCHASTIC 
 
 EXEC = handwritten_recognition
 
 SRC = $(wildcard *.cpp)
 OBJ = activation.o network.o extraction.o $(EXEC).o
-
 
 all:  $(OBJ)
 	$(CC) $(OBJ) $(GFLAG) -o $(EXEC)

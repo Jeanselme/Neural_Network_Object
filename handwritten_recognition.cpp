@@ -10,7 +10,7 @@ bool indice(vector<Neuron*> neurons, vector<int> labels) {
 	int max_neuron = 0;
 	int max_label  = 0;
 	for (uint i = 0; i < neurons.size(); ++i) {
-		printf("%f\n", (neurons.at(i))->getResult());
+		printf("%f -", (neurons.at(i))->getResult());
 		if ((neurons.at(i))->getResult() > (neurons.at(max_neuron))->getResult()) {
 			max_neuron = i;
 		}
@@ -22,8 +22,7 @@ bool indice(vector<Neuron*> neurons, vector<int> labels) {
 	return max_neuron == max_label;
 }
 
-int main( int argc, const char* argv[] )
-{
+int main() {
 	vector< vector<double> > images;
 	vector< vector<int> > labels;
 	string	database = "../Python/Initial/train-images.idx3-ubyte";
@@ -58,10 +57,9 @@ int main( int argc, const char* argv[] )
   	int correct = 0;
 	for (uint i = 0; i < labels.size(); ++i) {
 		net->compute(images.at(i));
-		net->print();
 		if (indice(net->getResult(), labels.at(i))) {
 			correct ++;
 		}
 	}
-	printf("%d / %d -> Classified\n", correct, labels.size());
+	printf("%d / %d -> Classified\n", correct, (int) labels.size());
 }

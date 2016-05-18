@@ -6,11 +6,14 @@
 #include <vector>
 #include <math.h>
 #include <stdio.h>
+#include <iomanip>
+#include <iostream>
 #include <assert.h>
 
 using namespace std;
 
 #define TOLERATE_ERROR 0.1
+#define NUMBER_STO 1000
 
 class Network {
 	/**

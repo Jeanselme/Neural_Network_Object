@@ -63,20 +63,35 @@ void Network::compute(vector<double> &inputs) {
 }
 
 void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets) {
+	cout << fixed << setprecision (2);
 	double error = 0;
 	double pasterror = TOLERATE_ERROR;
 	int tour = 0;
-	while (fabs(pasterror - error) >= TOLERATE_ERROR && tour <= 20) {
+	while (fabs(pasterror - error) >= TOLERATE_ERROR && tour < 100) {
 		pasterror = error;
 		error = 0;
 		tour++;
 		int image = 0;
-		for (vector< vector<double> >::iterator input = inputs.begin(); input != inputs.end(); ++input) {
+
+		printf("\nLearning -- %d\n", tour);
+		vector< vector<double> > inputs_studied;
+		vector< vector<int> > targets_studied;
+		#ifdef STOCHASTIC
+		for (int i = 0; i < NUMBER_STO; ++i) {
+			int index = rand() % inputs.size();
+			inputs_studied.push_back(inputs.at(index));
+			targets_studied.push_back(targets.at(index));
+		}
+		#else
+		inputs_studied = inputs;
+		targets_studied = targets;
+		#endif
+		for (vector< vector<double> >::iterator input = inputs_studied.begin(); input != inputs_studied.end(); ++input) {
 			resetDelta();
 			compute(*input);
 			int number_output = 0;
 			for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
-				double delta = (*output)->getResult() - targets.at(image).at(number_output);
+				double delta = (*output)->getResult() - targets_studied.at(image).at(number_output);
 				(*output)->addDelta(delta);
 				number_output ++;
 				error += pow(delta, 2);
@@ -89,11 +104,11 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 			}
 
 			image ++;
-			printf("%d -- %d / %d\n", tour, image, inputs.size());
-
+			float p = (float)image*100/inputs_studied.size();
+			cout << "\r> " << p << "%" << flush;
 
 		}
-		printf("-- > %f\n", error);
+		printf("\r--> %f\n", error);
 	}
 }
 
