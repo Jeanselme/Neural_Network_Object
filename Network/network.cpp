@@ -54,7 +54,7 @@ void Network::compute(vector<double> &inputs) {
 	for (vector<double>::iterator input = inputs.begin(); input != inputs.end(); ++input) {
 		(neurons.at(0).at(i))->addSum(*input);
 		i ++;
-	} 
+	}
 	for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
 			(*link)->compute();
@@ -62,13 +62,20 @@ void Network::compute(vector<double> &inputs) {
 	}
 }
 
+void updateLayer(vector< vector<Link*> > &links) {
+	double learning_rate = 0.000001;
+	for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
+		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
+			(*link)->back(learning_rate);
+		}
+	}
+}
+
 void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets) {
 	cout << fixed << setprecision (2);
-	double error = 0;
-	double pasterror = TOLERATE_ERROR;
+	double error = TOLERATE_ERROR;
 	int tour = 0;
-	while (fabs(pasterror - error) >= TOLERATE_ERROR && tour < 100) {
-		pasterror = error;
+	while (fabs(error) >= TOLERATE_ERROR) {
 		error = 0;
 		tour++;
 		int image = 0;
@@ -76,46 +83,70 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		printf("\nLearning -- %d\n", tour);
 		vector< vector<double> > inputs_studied;
 		vector< vector<int> > targets_studied;
+
 		#ifdef STOCHASTIC
 		for (int i = 0; i < NUMBER_STO; ++i) {
 			int index = rand() % inputs.size();
 			inputs_studied.push_back(inputs.at(index));
 			targets_studied.push_back(targets.at(index));
 		}
+		resetDelta();
 		#else
 		inputs_studied = inputs;
 		targets_studied = targets;
 		#endif
+
 		for (vector< vector<double> >::iterator input = inputs_studied.begin(); input != inputs_studied.end(); ++input) {
+			#ifndef STOCHASTIC
 			resetDelta();
+			#endif
+
 			compute(*input);
 			int number_output = 0;
 			for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
 				double delta = (*output)->getResult() - targets_studied.at(image).at(number_output);
+				error += 0.5*pow(delta, 2);
 				(*output)->addDelta(delta);
 				number_output ++;
-				error += pow(delta, 2);
 			}
 
-			for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
-				for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
-					(*link)->back();
-				}
-			}
+			#ifndef STOCHASTIC
+			updateLayer(links);
+			#endif
 
 			image ++;
 			float p = (float)image*100/inputs_studied.size();
 			cout << "\r> " << p << "%" << flush;
-
 		}
+		#ifdef STOCHASTIC
+		updateLayer(links);
+		#endif
 		printf("\r--> %f\n", error);
 	}
 }
 
-void Network::print() {
+void Network::printRes() {
 	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
 		for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
 			printf("%f ", (*node)->getResult());
+		}
+		printf("\n - \n");
+	}
+}
+
+void Network::printDelta() {
+	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
+		for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
+			printf("%f ", (*node)->getDelta());
+		}
+		printf("\n - \n");
+	}
+}
+
+void Network::printWeight() {
+	for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
+		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
+			printf("%f ", (*link)->getWeight());
 		}
 		printf("\n - \n");
 	}

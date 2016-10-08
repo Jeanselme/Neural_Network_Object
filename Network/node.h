@@ -8,16 +8,17 @@ class Neuron {
 	 * Class for representing a perceptron
 	 **/
 protected:
-	//
+	// Sum which will be computed in order
+	// to obtain the output of the neuron
 	double sumPrevious;
-	// 
+	// Delta of the neuron
 	double delta;
 public:
 	Neuron() {
 		sumPrevious = 0;
 		delta = 0;
 	};
-	
+
 	virtual double getResult() {
 		return functionSigmoid(sumPrevious);
 	};

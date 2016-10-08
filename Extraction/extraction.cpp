@@ -40,13 +40,14 @@ int readMNIST(const char* database, const char* labelname,vector< vector<double>
 				for(int c=0;c<n_cols;++c) {
 					unsigned char temp=0;
 					fileImage.read((char*)&temp,sizeof(temp));
-					images[i][(n_rows*r)+c]= (double)temp/255;
+					// Normalize the pixel
+					images[i][(n_rows*r)+c]= (double)temp/255. - 0.5;
 				}
 			}
 			unsigned char temp=0;
 			fileLabel.read((char*)&temp,sizeof(temp));
-			labels[i].assign(10,0);
-			labels[i][(int)temp] = 1;
+			labels[i].assign(1,0);
+			labels[i][temp] = 1;
 		}
 		return n_rows * n_cols;
 	}

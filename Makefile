@@ -1,7 +1,7 @@
 CC = g++
 
 # Delete -DSTOCHASTIC  if a real gradient descent is needed
-GFLAG = -O3 -Wall -Wextra -DSTOCHASTIC 
+GFLAG = -O3 -Wall -Wextra -DSTOCHASTIC
 
 EXEC = handwritten_recognition
 
@@ -12,7 +12,7 @@ OBJ= $(SRCNET:%.cpp=%.o) $(SRCEXT:%.cpp=%.o) $(EXEC).o
 all:  $(OBJ)
 	$(CC) $(OBJ) $(GFLAG) -o $(EXEC)
 
-run: 
+run: all
 	./$(EXEC)
 
 %.o: %.cpp

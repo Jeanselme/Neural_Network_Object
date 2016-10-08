@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define TOLERATE_ERROR 0.1
+#define TOLERATE_ERROR 0.01
 #define NUMBER_STO 1000
 
 class Network {
@@ -24,14 +24,14 @@ protected:
 	vector< vector<Neuron*> > neurons;
 	// Vector of links
 	vector< vector<Link*> > links;
-	
+
 public:
 	Network(int number_of_layer) {
 		assert(number_of_layer > 1);
 		neurons.resize(number_of_layer);
 		links.resize(number_of_layer - 1);
 	};
-	
+
 	vector<Neuron*> getResult();
 
 	void addNode(Neuron* newNode, int layer);
@@ -52,7 +52,11 @@ public:
 
 	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets);
 
-	void print();
+	void printRes();
+
+	void printDelta();
+
+	void printWeight();
 };
 
 #endif
