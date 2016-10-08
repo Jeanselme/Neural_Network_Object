@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define TOLERATE_ERROR 0.01
+#define TOLERATE_ERROR 0.001
 #define NUMBER_STO 1000
 
 class Network {
