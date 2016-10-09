@@ -40,7 +40,7 @@ int main() {
 	Bias* b1 = new Bias();
 	net->addNode(b1,1);
 
-	net->addNodes(1,2);
+	net->addNodes(10,2);
 	net->fullLinkage(1,2);
 
 	net->backpropagation(images, labels);

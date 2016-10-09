@@ -78,10 +78,10 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	double pasttotalerror = 1000000.;
 	double learning_rate = 0.000001;
 	int tour = 1;
+	int tourModulo = (int) (targets.size() / NUMBER_STO);
 	while (fabs(error - pasterror) >= TOLERATE_ERROR) {
 		pasterror = error;
 		error = 0;
-		tour++;
 		int image = 0;
 
 		printf("\nLearning -- %d\n", tour);
@@ -89,7 +89,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		vector< vector<int> > targets_studied;
 
 		#ifdef STOCHASTIC
-		if (tour % 100 == 0) {
+		if (tour % tourModulo == 0) {
 			if (totalerror > pasttotalerror) {
 				learning_rate /= 2.;
 			}
@@ -134,6 +134,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		#endif
 		printf("\r--> %f\n", error);
 		totalerror += error;
+		tour++;
 	}
 }
 
