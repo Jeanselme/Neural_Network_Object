@@ -76,10 +76,10 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	double pasterror = 10;
 	double totalerror = 0;
 	double pasttotalerror = 1000000.;
-	double learning_rate = 0.000001;
+	double learning_rate = 0.01;
 	int tour = 1;
 	int tourModulo = (int) (targets.size() / NUMBER_STO);
-	while (fabs(error - pasterror) >= TOLERATE_ERROR) {
+	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < 20) {
 		pasterror = error;
 		error = 0;
 		int image = 0;
@@ -96,8 +96,9 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 			pasttotalerror = totalerror;
 			totalerror = 0;
 		}
+		Random *random = Random::get();
 		for (int i = 0; i < NUMBER_STO; ++i) {
-			int index = rand() % inputs.size();
+			int index = random->getRandom() * inputs.size();
 			inputs_studied.push_back(inputs.at(index));
 			targets_studied.push_back(targets.at(index));
 		}

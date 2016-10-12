@@ -20,11 +20,11 @@ public:
 	};
 
 	virtual double getResult() {
-		return functionSigmoid(sumPrevious);
+		return functionSigmoidUpdate(sumPrevious);
 	};
 
 	double getDelta() {
-		return derivativeSigmoid(sumPrevious)*delta;
+		return derivativeSigmoidUpdate(sumPrevious)*delta;
 	};
 
 	void addDelta(double delta_to_add) {

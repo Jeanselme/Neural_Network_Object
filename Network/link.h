@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "node.h"
+#include "random.h"
 
 class Link {
 	/**
@@ -14,12 +15,13 @@ private:
 	Neuron* next;
 	// Weight of the link
 	double weight;
+
 public:
 	Link(Neuron* n1, Neuron* n2) {
+		Random *random = Random::get();
 		previous = n1;
 		next = n2;
-		weight = (static_cast <float> (rand())
-			/ static_cast <float> (RAND_MAX)) * 2 - 1;
+		weight = random->getRandom()*2 - 1;
 	};
 
 	void compute() {

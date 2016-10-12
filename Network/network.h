@@ -3,6 +3,7 @@
 
 #include "link.h"
 #include "node.h"
+#include "random.h"
 #include <vector>
 #include <math.h>
 #include <stdio.h>
@@ -13,7 +14,7 @@
 using namespace std;
 
 #define TOLERATE_ERROR 0.001
-#define NUMBER_STO 1000
+#define NUMBER_STO 10000
 
 class Network {
 	/**
