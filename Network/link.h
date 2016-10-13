@@ -15,13 +15,15 @@ private:
 	Neuron* next;
 	// Weight of the link
 	double weight;
+	double newWeight;
 
 public:
 	Link(Neuron* n1, Neuron* n2) {
 		Random *random = Random::get();
 		previous = n1;
 		next = n2;
-		weight = random->getRandom()*2 - 1;
+		weight = random->getRandom() * 2 - 1;
+		newWeight = weight;
 	};
 
 	void compute() {
@@ -29,8 +31,12 @@ public:
 	};
 
 	void back(double learning_rate) {
-		weight -= next->getDelta() * previous->getResult() * learning_rate;
+		newWeight -= next->getDelta() * previous->getResult() * learning_rate;
 		previous->addDelta(weight * next->getDelta());
+	};
+
+	void update() {
+		weight = newWeight;
 	};
 
 	double getWeight() {

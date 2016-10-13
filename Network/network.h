@@ -14,7 +14,7 @@
 using namespace std;
 
 #define TOLERATE_ERROR 0.001
-#define NUMBER_STO 10000
+#define NUMBER_STO 1000
 
 class Network {
 	/**
@@ -50,6 +50,10 @@ public:
 	void resetDelta();
 
 	void compute(vector<double> &inputs);
+
+	void backLayer(double learning_rate);
+
+	void updateLayer();
 
 	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets);
 

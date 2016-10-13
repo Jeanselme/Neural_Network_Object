@@ -35,7 +35,7 @@ int main() {
 	Bias* b0 = new Bias();
 	net->addNode(b0,0);
 
-	net->addNodes(200,1);
+	net->addNodes(30,1);
 	net->fullLinkage(0,1);
 	Bias* b1 = new Bias();
 	net->addNode(b1,1);
@@ -45,8 +45,8 @@ int main() {
 
 	net->backpropagation(images, labels);
 
-	database = "../Python/Initial/t10k-images.idx3-ubyte";
-	labelname = "../Python/Initial/t10k-labels.idx1-ubyte";
+//	database = "../Python/Initial/t10k-images.idx3-ubyte";
+//	labelname = "../Python/Initial/t10k-labels.idx1-ubyte";
   inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
 
   int correct = 0;
