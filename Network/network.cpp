@@ -95,7 +95,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	Random *random = Random::get();
 	#endif
 
-	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < 1000) {
+	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < 600000) {
 		pasterror = error;
 		error = 0;
 		int image = 0;

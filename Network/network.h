@@ -13,8 +13,8 @@
 
 using namespace std;
 
-#define TOLERATE_ERROR 0.001
-#define NUMBER_STO 1000
+#define TOLERATE_ERROR 0.00001
+#define NUMBER_STO 10
 
 class Network {
 	/**
