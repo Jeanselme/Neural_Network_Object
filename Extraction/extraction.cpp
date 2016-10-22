@@ -20,9 +20,11 @@ int readMNIST(const char* database, const char* labelname,vector< vector<double>
 		int n_rows = 0;
 		int n_cols = 0;
 
+		fileLabel.read((char*)&magic_number,sizeof(magic_number));
 		fileImage.read((char*)&magic_number,sizeof(magic_number));
 		magic_number = reverseInt(magic_number);
 
+		fileLabel.read((char*)&number_of_images,sizeof(number_of_images));
 		fileImage.read((char*)&number_of_images,sizeof(number_of_images));
 		number_of_images = reverseInt(number_of_images);
 
@@ -36,6 +38,7 @@ int readMNIST(const char* database, const char* labelname,vector< vector<double>
 		labels.resize(number_of_images,vector<int>(10));
 
 		for(int i=0;i<number_of_images;++i) {
+			images[i].assign(n_rows * n_cols,0);
 			for(int r=0;r<n_rows;++r) {
 				for(int c=0;c<n_cols;++c) {
 					unsigned char temp=0;
@@ -46,7 +49,8 @@ int readMNIST(const char* database, const char* labelname,vector< vector<double>
 			}
 			unsigned char temp=0;
 			fileLabel.read((char*)&temp,sizeof(temp));
-			labels[i].assign(10,-1);
+			printf("%d ",temp);
+			labels[i].assign(10,0);
 			labels[i][temp] = 1;
 		}
 		return n_rows * n_cols;
