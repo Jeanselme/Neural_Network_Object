@@ -66,9 +66,6 @@ void Network::backLayer(double learning_rate) {
 	for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
 			(*link)->back(learning_rate);
-			#ifndef STOCHASTIC
-			(*link)->update();
-			#endif
 		}
 	}
 }
@@ -85,42 +82,28 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	cout << fixed << setprecision (2);
 	double error = TOLERATE_ERROR;
 	double pasterror = 10;
-	double learning_rate = 0.003;
+	double learning_rate = 0.1;
 	int tour = 1;
+	int batch = inputs.size()/SIZE_BATCH;
 
-	#ifdef STOCHASTIC
-	double totalerror = 0;
-	double pasttotalerror = 1000000.;
-	int tourModulo = (int) (targets.size() / NUMBER_STO);
-	Random *random = Random::get();
-	#endif
+	vector< vector<double> > inputs_studied;
+	vector< vector<int> > targets_studied;
 
-	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < 600000) {
-		pasterror = error;
+	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < 10) {
+		inputs_studied.clear();
+		targets_studied.clear();
+		vector <int> shuffle;
+		for (int i=0; i<int(inputs.size()); i++) shuffle.push_back(i);
+		random_shuffle(shuffle.begin(),shuffle.end());
+		for (vector< int >::iterator order = shuffle.begin(); order != shuffle.end(); ++order) {
+			inputs_studied.push_back(inputs.at(*order));
+			targets_studied.push_back(targets.at(*order));
+		}
+
 		error = 0;
 		int image = 0;
 
 		printf("\nLearning -- %d\n", tour);
-		vector< vector<double> > inputs_studied;
-		vector< vector<int> > targets_studied;
-
-		#ifdef STOCHASTIC
-		if (tour % tourModulo == 0) {
-			if (totalerror > pasttotalerror) {
-				learning_rate /= 2.;
-			}
-			pasttotalerror = totalerror;
-			totalerror = 0;
-		}
-		for (int i = 0; i < NUMBER_STO; ++i) {
-			int index = random->getRandom() * inputs.size();
-			inputs_studied.push_back(inputs.at(index));
-			targets_studied.push_back(targets.at(index));
-		}
-		#else
-		inputs_studied = inputs;
-		targets_studied = targets;
-		#endif
 
 		for (vector< vector<double> >::iterator input = inputs_studied.begin(); input != inputs_studied.end(); ++input) {
 			compute(*input);
@@ -138,12 +121,11 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 			image ++;
 			float p = (float)image*100/inputs_studied.size();
 			cout << "\r> " << p << "%" << flush;
+			if (image%batch == 0) {
+				updateLayer();
+			}
 		}
-		#ifdef STOCHASTIC
-		updateLayer();
-		#endif
 		printf("\r--> %f\n", error);
-		totalerror += error;
 		tour++;
 	}
 }

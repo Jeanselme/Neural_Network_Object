@@ -10,10 +10,12 @@
 #include <iomanip>
 #include <iostream>
 #include <assert.h>
+#include <algorithm>
 
 using namespace std;
 
 #define TOLERATE_ERROR 0.00001
+#define SIZE_BATCH 100
 #define NUMBER_STO 10
 
 class Network {

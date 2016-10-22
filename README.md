@@ -37,13 +37,8 @@ The extraction puts the input between -0.5 and 0.5.
 #### Stochastic gradient
 The network computes subset of the training set at each epoch, in order to be faster.
 
-#### Evolution learning rate
-Not an adapted solution for stochastic gradient to adapte at each step.  
-However, it could be interesting to adapte the learning rate in function of the square root of the number of inputs.  
-Moreover, the current algorithm updates the learning rate every (number of element in the training set / number of the epoch) = 100 epochs.
-
-### Results
-
+## Future enhancements
+Parallelized the neural network and adapte the learning rate thanke to its number of incoming links.
 
 ## Reference
 This work is based on the following paper : Efficient BackProp by Yann Lecun, Leon Bottou, Genevieve B. Orr, and Klaus-Robert Müller.

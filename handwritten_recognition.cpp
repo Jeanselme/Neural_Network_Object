@@ -45,8 +45,8 @@ int main() {
 
 	net->backpropagation(images, labels);
 
-//	database = "../Python/Object/Initial/t10k-images.idx3-ubyte";
-//	labelname = "../Python/Object/Initial/t10k-labels.idx1-ubyte";
+	database = "../Python/Object/Initial/t10k-images.idx3-ubyte";
+	labelname = "../Python/Object/Initial/t10k-labels.idx1-ubyte";
   inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
 
   int correct = 0;

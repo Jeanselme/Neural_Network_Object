@@ -31,7 +31,7 @@ public:
 
 	virtual double getResult() {
 		if (!computed) {
-			result = functionSigmoidUpdate(sumPrevious);
+			result = functionSigmoid(sumPrevious);
 			computed = true;
 		}
 		return result;
@@ -39,7 +39,7 @@ public:
 
 	double getDelta() {
 		if (!deltaComputed) {
-			deltaResult = derivativeSigmoidUpdate(sumPrevious)*delta;
+			deltaResult = derivativeSigmoid(result)*delta;
 			deltaComputed = true;
 		}
 		return deltaResult;
