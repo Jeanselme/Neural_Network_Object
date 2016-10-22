@@ -89,7 +89,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	vector< vector<double> > inputs_studied;
 	vector< vector<int> > targets_studied;
 
-	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < 10) {
+	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < MAX_ITERATION) {
 		inputs_studied.clear();
 		targets_studied.clear();
 		vector <int> shuffle;
@@ -98,6 +98,10 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		for (vector< int >::iterator order = shuffle.begin(); order != shuffle.end(); ++order) {
 			inputs_studied.push_back(inputs.at(*order));
 			targets_studied.push_back(targets.at(*order));
+		}
+
+		if (pasterror > error) {
+			learning_rate /= 2;
 		}
 
 		error = 0;
@@ -121,6 +125,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 			image ++;
 			float p = (float)image*100/inputs_studied.size();
 			cout << "\r> " << p << "%" << flush;
+
 			if (image%batch == 0) {
 				updateLayer();
 			}
