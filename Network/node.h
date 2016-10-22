@@ -13,18 +13,36 @@ protected:
 	double sumPrevious;
 	// Delta of the neuron
 	double delta;
+
+	// To avoid computation repetition
+	double result;
+	bool computed;
+
+	double deltaResult;
+	bool deltaComputed;
+
 public:
 	Neuron() {
 		sumPrevious = 0;
 		delta = 0;
+		computed = false;
+		deltaComputed = false;
 	};
 
 	virtual double getResult() {
-		return functionSigmoidUpdate(sumPrevious);
+		if (!computed) {
+			result = functionSigmoidUpdate(sumPrevious);
+			computed = true;
+		}
+		return result;
 	};
 
 	double getDelta() {
-		return derivativeSigmoidUpdate(sumPrevious)*delta;
+		if (!deltaComputed) {
+			deltaResult = derivativeSigmoidUpdate(sumPrevious)*delta;
+			deltaComputed = true;
+		}
+		return deltaResult;
 	};
 
 	void addDelta(double delta_to_add) {
@@ -37,10 +55,12 @@ public:
 
 	void reinitDelta() {
 		delta = 0;
+		deltaComputed = false;
 	};
 
 	void reinitSum() {
 		sumPrevious = 0;
+		computed = false;
 	};
 
 };
