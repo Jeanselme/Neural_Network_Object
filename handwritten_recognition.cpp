@@ -29,21 +29,21 @@ int main() {
 	string labelname = "../Python/Object/Initial/train-labels.idx1-ubyte";
   int inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
 
-	Network* net = new Network(NUMBER_LAYER);
+	Network net = Network(NUMBER_LAYER);
 
-	net->addInputs(inputDimension);
+	net.addInputs(inputDimension);
 	Bias* b0 = new Bias();
-	net->addNode(b0,0);
+	net.addNode(b0,0);
 
-	net->addNodes(50,1);
-	net->fullLinkage(0,1);
+	net.addNodes(50,1);
+	net.fullLinkage(0,1);
 	Bias* b1 = new Bias();
-	net->addNode(b1,1);
+	net.addNode(b1,1);
 
-	net->addNodes(10,2);
-	net->fullLinkage(1,2);
+	net.addNodes(10,2);
+	net.fullLinkage(1,2);
 
-	net->backpropagation(images, labels);
+	net.backpropagation(images, labels);
 
 	database = "../Python/Object/Initial/t10k-images.idx3-ubyte";
 	labelname = "../Python/Object/Initial/t10k-labels.idx1-ubyte";
@@ -51,8 +51,8 @@ int main() {
 
   int correct = 0;
 	for (uint i = 0; i < labels.size(); ++i) {
-		net->compute(images.at(i));
-		if (indice(net->getResult(), labels.at(i))) {
+		net.compute(images.at(i));
+		if (indice(net.getResult(), labels.at(i))) {
 			correct ++;
 		}
 	}
