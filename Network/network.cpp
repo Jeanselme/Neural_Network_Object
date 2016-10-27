@@ -90,6 +90,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	vector< vector<int> > targets_studied;
 
 	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < MAX_ITERATION) {
+		// Shuffles the dataset
 		inputs_studied.clear();
 		targets_studied.clear();
 		vector <int> shuffle;
@@ -100,32 +101,37 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 			targets_studied.push_back(targets.at(*order));
 		}
 
+		// Updates the learning rate
+		// TODO : Wolfe conditions
 		if (pasterror > error) {
 			learning_rate /= 2;
 		}
 
 		error = 0;
 		int image = 0;
+		vector< vector<int> >::iterator target = targets_studied.begin();
 
 		printf("\nLearning -- %d\n", tour);
-
+		// Computes for each image the backpropagation
 		for (vector< vector<double> >::iterator input = inputs_studied.begin(); input != inputs_studied.end(); ++input) {
 			compute(*input);
-			int number_output = 0;
+			vector<int>::iterator targetOut = target->begin();
 			for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
-				double delta = (*output)->getResult() - targets_studied.at(image).at(number_output);
+				double delta = (*output)->getResult() - *targetOut;
 				error += 0.5*pow(delta, 2);
 				(*output)->addDelta(delta);
-				number_output ++;
+				targetOut ++;
 			}
 
 			backLayer(learning_rate);
 			resetDelta();
 
 			image ++;
+			target ++;
 			float p = (float)image*100/inputs_studied.size();
 			cout << "\r> " << p << "%" << flush;
 
+			// Updates if it is a batch learning
 			if (image%batch == 0) {
 				updateLayer();
 			}

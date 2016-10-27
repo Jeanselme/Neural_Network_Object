@@ -15,9 +15,8 @@
 using namespace std;
 
 #define TOLERATE_ERROR 0.00001
-#define MAX_ITERATION 100
+#define MAX_ITERATION 10
 #define SIZE_BATCH 100
-#define NUMBER_STO 10
 
 class Network {
 	/**
