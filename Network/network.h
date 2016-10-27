@@ -15,7 +15,7 @@
 using namespace std;
 
 #define TOLERATE_ERROR 0.00001
-#define MAX_ITERATION 10
+#define MAX_ITERATION 100
 #define SIZE_BATCH 100
 
 class Network {
@@ -33,6 +33,19 @@ public:
 		assert(number_of_layer > 1);
 		neurons.resize(number_of_layer);
 		links.resize(number_of_layer - 1);
+	};
+
+	~Network() {
+		for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
+			for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
+				delete(*link);
+			}
+		}
+		for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
+			for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
+				delete(*node);
+			}
+		}
 	};
 
 	vector<Neuron*> getResult();

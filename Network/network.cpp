@@ -89,7 +89,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	vector< vector<double> > inputs_studied;
 	vector< vector<int> > targets_studied;
 
-	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour < MAX_ITERATION) {
+	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour <= MAX_ITERATION) {
 		// Shuffles the dataset
 		inputs_studied.clear();
 		targets_studied.clear();

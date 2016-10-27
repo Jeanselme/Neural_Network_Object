@@ -22,6 +22,10 @@ public:
 		return instance;
 	}
 
+	~Random() {
+		free(instance);
+	}
+
 	double getRandom() {
 		return ((static_cast <float> (rand())
 			/ static_cast <float> (RAND_MAX)));

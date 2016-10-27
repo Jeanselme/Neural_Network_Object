@@ -29,6 +29,8 @@ public:
 		deltaComputed = false;
 	};
 
+	virtual ~Neuron() {};
+
 	virtual double getResult() {
 		if (!computed) {
 			result = functionSigmoid(sumPrevious);
@@ -70,6 +72,7 @@ class Bias : public Neuron {
 	 * Particular perceptron which does not compute
 	 **/
 public:
+	~Bias() {};
 	double getResult() {
 		return 1;
 	};
@@ -80,6 +83,7 @@ class Input : public Neuron {
 	 * Particular perceptron which does not change
 	 **/
 public:
+	~Input(){};
 	double getResult() {
 		return sumPrevious;
 	};

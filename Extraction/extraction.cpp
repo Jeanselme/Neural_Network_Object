@@ -12,6 +12,8 @@ int reverseInt (int i) {
 }
 
 int readMNIST(const char* database, const char* labelname,vector< vector<double> > &images, vector< vector<int> > &labels) {
+	images.clear();
+	labels.clear();
 	ifstream fileImage(database, ios::binary);
 	ifstream fileLabel(labelname, ios::binary);
 	if (fileImage.is_open() && fileLabel.is_open()) {
