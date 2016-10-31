@@ -1,5 +1,9 @@
-# Neural_Network_Backpropagation
+# Neural_Network_Object
 Library of a neural network with backpropagation
+
+## Why Object ?
+My first idea was to create a neural network which would be easy to manipulate. And to allow to create evolutive neural network. Each node is an object which is easy to change, destroy or add.  
+However, that implies lower performances than matricial neural network.
 
 ## Project organization
 The root directory contains an analysis of the MNIST database :  http://yann.lecun.com/exdb/mnist/.
@@ -38,7 +42,8 @@ The extraction puts the input between -0.5 and 0.5.
 The network computes subset of the training set at each epoch, in order to be faster.
 
 ## Future enhancements
-Parallelized the neural network and adapte the learning rate thanke to its number of incoming links.
+Parallelize the neural network and adapte the learning rate thanks to its number of incoming links.  
+Create evolutive neural network, and convolutional one.
 
 ## Reference
 This work is based on the following paper : Efficient BackProp by Yann Lecun, Leon Bottou, Genevieve B. Orr, and Klaus-Robert Müller.
