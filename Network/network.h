@@ -66,7 +66,7 @@ public:
 
 	void compute(vector<double> &inputs);
 
-	void backLayer(double learning_rate);
+	void backLayer(double learning_rate, double regularization);
 
 	void updateLayer();
 

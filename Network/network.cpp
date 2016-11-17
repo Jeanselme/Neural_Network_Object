@@ -62,10 +62,10 @@ void Network::compute(vector<double> &inputs) {
 	}
 }
 
-void Network::backLayer(double learning_rate) {
+void Network::backLayer(double learning_rate, double regularization) {
 	for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
-			(*link)->back(learning_rate);
+			(*link)->back(learning_rate, regularization);
 		}
 	}
 }
@@ -83,6 +83,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	double error = TOLERATE_ERROR;
 	double pasterror = 10;
 	double learning_rate = 0.1;
+	double regularization = 1/SIZE_BATCH;
 	int tour = 1;
 	int batch = inputs.size()/SIZE_BATCH;
 
@@ -123,7 +124,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 				targetOut ++;
 			}
 
-			backLayer(learning_rate);
+			backLayer(learning_rate, regularization);
 			resetDelta();
 
 			image ++;

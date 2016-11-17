@@ -30,9 +30,11 @@ public:
 		next->addSum(weight * previous->getResult());
 	};
 
-	void back(double learning_rate) {
+	void back(double learning_rate, double regularization) {
+		// In order to avoid aoverfitting and too large weight, we add a regularization term
+		// This one has to be positive
 		newWeight -= next->getDelta() * previous->getResult() * learning_rate;
-		previous->addDelta(weight * next->getDelta());
+		previous->addDelta(weight * (next->getDelta() + regularization));
 	};
 
 	void update() {

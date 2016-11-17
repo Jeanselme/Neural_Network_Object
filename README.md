@@ -41,8 +41,11 @@ The extraction puts the input between -0.5 and 0.5.
 #### Stochastic gradient
 The network computes subset of the training set at each epoch, in order to be faster.
 
+#### Regularization
+The weight is added to the loss function, in order to reduce the l2-norm of the weight.
+
 ## Future enhancements
-Parallelize the neural network and adapte the learning rate thanks to its number of incoming links.  
+Parallelize the neural network and adapte the learning rate thanks to its number of incoming links. It would be interesting to see the impact of an evoluting regularization rate, which incresases when the neural network has good results.  
 Create evolutive neural network, and convolutional one.
 
 ## Reference
