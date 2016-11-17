@@ -104,10 +104,11 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 
 		// Updates the learning rate
 		// TODO : Wolfe conditions
-		if (pasterror > error) {
+		if (pasterror < error) {
 			learning_rate /= 2;
 		}
 
+		pasterror = error;
 		error = 0;
 		int image = 0;
 		vector< vector<int> >::iterator target = targets_studied.begin();
