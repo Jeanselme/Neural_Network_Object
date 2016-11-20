@@ -15,7 +15,8 @@
 using namespace std;
 
 #define TOLERATE_ERROR 0.00001
-#define MAX_ITERATION 100
+#define DROP_FRACTION 0.5
+#define MAX_ITERATION 500
 #define SIZE_BATCH 100
 
 class Network {
@@ -60,17 +61,19 @@ public:
 
 	void fullLinkage(int layer1, int layer2);
 
+	void dropHalfNode(int layer);
+
 	void resetSum();
 
 	void resetDelta();
 
-	void compute(vector<double> &inputs);
+	void compute(vector<double> &inputs, bool dropout = false);
 
 	void backLayer(double learning_rate, double regularization);
 
 	void updateLayer();
 
-	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets);
+	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets, bool dropout = true);
 
 	void printRes();
 

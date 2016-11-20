@@ -55,6 +55,10 @@ public:
 		sumPrevious += val_to_add;
 	};
 
+	void multiplySum(double factor) {
+		sumPrevious *= factor;
+	};
+
 	void reinitDelta() {
 		delta = 0;
 		deltaComputed = false;
