@@ -42,7 +42,12 @@ The extraction puts the input between -0.5 and 0.5.
 The network computes subset of the training set at each epoch, in order to be faster.
 
 #### Regularization
+
+##### L2-Norm
 The weight is added to the loss function, in order to reduce the l2-norm of the weight.
+
+##### Dropout
+During the learning phase, some nodes are put to zero in order to avoid overfitting.
 
 ## Future enhancements
 Parallelize the neural network and adapte the learning rate thanks to its number of incoming links. It would be interesting to see the impact of an evoluting regularization rate, which incresases when the neural network has good results.  
