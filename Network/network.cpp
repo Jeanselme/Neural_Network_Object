@@ -32,6 +32,23 @@ void Network::fullLinkage(int layer1, int layer2){
 	}
 }
 
+void Network::dropHalfNode(int layer){
+	Random *random = Random::get();
+	int nodesNumber = neurons.at(layer).size();
+	bool toDrop[nodesNumber];
+	random->randomBoolean(nodesNumber, toDrop, DROP_FRACTION);
+	// Update Sum
+	int i = 0;
+	for (vector<Neuron*>::iterator node = neurons.at(layer).begin(); node != neurons.at(layer).end(); ++node) {
+		if (toDrop[i]) {
+			(*node)->reinitSum();
+		} else {
+			(*node)->multiplySum(1./DROP_FRACTION);
+		}
+		i++;
+	}
+}
+
 void Network::resetSum() {
 	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
 		for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
@@ -48,17 +65,22 @@ void Network::resetDelta() {
 	}
 }
 
-void Network::compute(vector<double> &inputs) {
+void Network::compute(vector<double> &inputs, bool dropout) {
 	resetSum();
 	int i = 0;
 	for (vector<double>::iterator input = inputs.begin(); input != inputs.end(); ++input) {
 		(neurons.at(0).at(i))->addSum(*input);
 		i ++;
 	}
+	i = 1;
 	for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
 			(*link)->compute();
 		}
+		if (dropout) {
+			dropHalfNode(i);
+		}
+		i++;
 	}
 }
 
@@ -104,9 +126,6 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 
 		// Updates the learning rate
 		// TODO : Wolfe conditions
-		if (pasterror < error) {
-			learning_rate /= 2;
-		}
 
 		pasterror = error;
 		error = 0;
@@ -116,7 +135,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		printf("\nLearning -- %d\n", tour);
 		// Computes for each image the backpropagation
 		for (vector< vector<double> >::iterator input = inputs_studied.begin(); input != inputs_studied.end(); ++input) {
-			compute(*input);
+			compute(*input, true);
 			vector<int>::iterator targetOut = target->begin();
 			for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
 				double delta = (*output)->getResult() - *targetOut;
