@@ -73,7 +73,7 @@ public:
 
 	void updateLayer();
 
-	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets);
+	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets, bool dropout = true);
 
 	void printRes();
 

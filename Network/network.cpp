@@ -100,7 +100,7 @@ void Network::updateLayer() {
 	}
 }
 
-void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets) {
+void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets, bool dropout) {
 	cout << fixed << setprecision (2);
 	double error = TOLERATE_ERROR;
 	double pasterror = 10;
@@ -135,7 +135,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		printf("\nLearning -- %d\n", tour);
 		// Computes for each image the backpropagation
 		for (vector< vector<double> >::iterator input = inputs_studied.begin(); input != inputs_studied.end(); ++input) {
-			compute(*input, true);
+			compute(*input, dropout);
 			vector<int>::iterator targetOut = target->begin();
 			for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
 				double delta = (*output)->getResult() - *targetOut;
