@@ -1,7 +1,7 @@
 CC = g++
 
 # Delete -DSTOCHASTIC  if a real gradient descent is needed
-GFLAG = -O3 -Wall -Wextra
+GFLAG = -O3 -Wall -Wextra -fopenmp -DOMP_NUM_THREADS=7
 
 EXEC = handwritten_recognition
 

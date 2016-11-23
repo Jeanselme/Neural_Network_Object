@@ -4,6 +4,7 @@
 #include "link.h"
 #include "node.h"
 #include "random.h"
+#include <omp.h>
 #include <vector>
 #include <math.h>
 #include <stdio.h>
@@ -15,8 +16,13 @@
 using namespace std;
 
 #define TOLERATE_ERROR 0.00001
-#define MAX_ITERATION 100
+#define MAX_ITERATION 10
 #define SIZE_BATCH 100
+
+struct train_data {
+	vector<double> input;
+	vector<int> target;
+};
 
 class Network {
 	/**
@@ -60,15 +66,15 @@ public:
 
 	void fullLinkage(int layer1, int layer2);
 
-	void resetSum();
+	void resetSum(int tid);
 
-	void resetDelta();
+	void resetDelta(int tid);
 
-	void compute(vector<double> &inputs);
+	void compute(vector<double> &inputs, int tid = 0);
 
-	void backLayer(double learning_rate, double regularization);
+	void backLayer(double learning_rate, int tid);
 
-	void updateLayer();
+	void updateLayer(double learning_rate, double regularization);
 
 	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets);
 

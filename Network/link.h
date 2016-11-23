@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <omp.h>
 #include "node.h"
 #include "random.h"
 
@@ -15,7 +17,7 @@ private:
 	Neuron* next;
 	// Weight of the link
 	double weight;
-	double newWeight;
+	double newWeight[OMP_NUM_THREADS];
 
 public:
 	Link(Neuron* n1, Neuron* n2) {
@@ -23,22 +25,26 @@ public:
 		previous = n1;
 		next = n2;
 		weight = random->getRandom() * 2 - 1;
-		newWeight = weight;
+		memset(newWeight, 0, OMP_NUM_THREADS);
 	};
 
-	void compute() {
-		next->addSum(weight * previous->getResult());
+	void compute(int tid) {
+		next->addSum(weight * previous->getResult(tid), tid);
 	};
 
-	void back(double learning_rate, double regularization) {
+	void back(double learning_rate, int tid) {
 		// In order to avoid aoverfitting and too large weight, we add a regularization term
 		// This one has to be positive
-		newWeight -= next->getDelta() * previous->getResult() * learning_rate + learning_rate * regularization * weight;
-		previous->addDelta(weight * next->getDelta());
+		newWeight[tid] += next->getDelta(tid) * previous->getResult(tid) * learning_rate;
+		previous->addDelta(weight * next->getDelta(tid), tid);
 	};
 
-	void update() {
-		weight = newWeight;
+	void update(double learning_rate, double regularization) {
+		for (int i = 0; i < OMP_NUM_THREADS; i++) {
+			weight -= newWeight[i];
+			newWeight[i] = 0;
+		}
+		weight -= learning_rate * regularization * weight;
 	};
 
 	double getWeight() {
