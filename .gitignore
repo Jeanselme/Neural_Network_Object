@@ -2,3 +2,5 @@
 *.o
 out
 handwritten_recognition
+Data/*.gz
+Data/*-ubyte

@@ -23,8 +23,8 @@ bool indice(vector<Neuron*> neurons, vector<int> labels) {
 int main() {
 	vector< vector<double> > images;
 	vector< vector<int> > labels;
-	string database = "../Python/Object/Initial/train-images.idx3-ubyte";
-	string labelname = "../Python/Object/Initial/train-labels.idx1-ubyte";
+	string database = "Data/train-images-idx3-ubyte";
+	string labelname = "Data/train-labels-idx1-ubyte";
   int inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
 
 	Network net = Network(NUMBER_LAYER);
@@ -33,7 +33,7 @@ int main() {
 	Bias* b0 = new Bias();
 	net.addNode(b0,0);
 
-	net.addNodes(500,1);
+	net.addNodes(50,1);
 	net.fullLinkage(0,1);
 	Bias* b1 = new Bias();
 	net.addNode(b1,1);
@@ -43,8 +43,8 @@ int main() {
 
 	net.backpropagation(images, labels);
 
-	database = "../Python/Object/Initial/t10k-images.idx3-ubyte";
-	labelname = "../Python/Object/Initial/t10k-labels.idx1-ubyte";
+	database = "Data/t10k-images-idx3-ubyte";
+	labelname = "Data/t10k-labels-idx1-ubyte";
   inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
 
   int correct = 0;

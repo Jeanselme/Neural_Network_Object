@@ -9,7 +9,7 @@ However, that implies lower performances than matricial neural network.
 The root directory contains an analysis of the MNIST database :  http://yann.lecun.com/exdb/mnist/.
 
 ### Extraction
-Contains the database and the library for extracting data.
+Contains library for extracting data.
 
 ### Network
 Contains the network with its nodes and links.
@@ -43,6 +43,17 @@ The network computes subset of the training set at each epoch, in order to be fa
 
 #### Regularization
 The weight is added to the loss function, in order to reduce the l2-norm of the weight.
+
+## How to launch it ?
+```
+make download
+```
+In order to download and extracts data. If you have not python3.5 and gunzip, please download the data on Lecun website and unzip the different database in Data folder.  
+
+```
+make run
+```
+To run the handwritten example with a simple neural network.
 
 ## Future enhancements
 Parallelize the neural network and adapte the learning rate thanks to its number of incoming links. It would be interesting to see the impact of an evoluting regularization rate, which incresases when the neural network has good results.  
