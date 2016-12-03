@@ -10,7 +10,6 @@ bool indice(vector<Neuron*> neurons, vector<int> labels) {
 	int max_neuron = 0;
 	int max_label  = 0;
 	for (uint i = 0; i < neurons.size(); ++i) {
-		printf("%f - ", (neurons.at(i))->getResult());
 		if ((neurons.at(i))->getResult() > (neurons.at(max_neuron))->getResult()) {
 			max_neuron = i;
 		}
@@ -18,7 +17,6 @@ bool indice(vector<Neuron*> neurons, vector<int> labels) {
 			max_label = i;
 		}
 	}
-	printf("> %d -- %d\n", max_neuron, max_label);
 	return max_neuron == max_label;
 }
 
@@ -35,7 +33,7 @@ int main() {
 	Bias* b0 = new Bias();
 	net.addNode(b0,0);
 
-	net.addNodes(50,1);
+	net.addNodes(500,1);
 	net.fullLinkage(0,1);
 	Bias* b1 = new Bias();
 	net.addNode(b1,1);

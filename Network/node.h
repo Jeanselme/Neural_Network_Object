@@ -2,6 +2,9 @@
 #define __NODE_H
 
 #include "activation.h"
+#include <assert.h>
+#include <string.h>
+#include <omp.h>
 
 class Neuron {
 	/**
@@ -10,59 +13,59 @@ class Neuron {
 protected:
 	// Sum which will be computed in order
 	// to obtain the output of the neuron
-	double sumPrevious;
+	double sumPrevious[OMP_NUM_THREADS];
 	// Delta of the neuron
-	double delta;
+	double delta[OMP_NUM_THREADS];
 
 	// To avoid computation repetition
-	double result;
-	bool computed;
+	double result[OMP_NUM_THREADS];
+	bool computed[OMP_NUM_THREADS];
 
-	double deltaResult;
-	bool deltaComputed;
+	double deltaResult[OMP_NUM_THREADS];
+	bool deltaComputed[OMP_NUM_THREADS];
 
 public:
 	Neuron() {
-		sumPrevious = 0;
-		delta = 0;
-		computed = false;
-		deltaComputed = false;
+		memset(sumPrevious, 0, OMP_NUM_THREADS);
+		memset(delta, 0, OMP_NUM_THREADS);
+		memset(computed, false, OMP_NUM_THREADS);
+		memset(deltaComputed, false, OMP_NUM_THREADS);
 	};
 
 	virtual ~Neuron() {};
 
-	virtual double getResult() {
-		if (!computed) {
-			result = functionSigmoid(sumPrevious);
-			computed = true;
+	virtual double getResult(int tid = 0) {
+		if (!computed[tid]) {
+			result[tid] = functionSigmoid(sumPrevious[tid]);
+			computed[tid] = true;
 		}
-		return result;
+		return result[tid];
 	};
 
-	double getDelta() {
-		if (!deltaComputed) {
-			deltaResult = derivativeSigmoid(result)*delta;
-			deltaComputed = true;
+	double getDelta(int tid) {
+		if (!deltaComputed[tid]) {
+			deltaResult[tid] = derivativeSigmoid(result[tid])*delta[tid];
+			deltaComputed[tid] = true;
 		}
-		return deltaResult;
+		return deltaResult[tid];
 	};
 
-	void addDelta(double delta_to_add) {
-		delta += delta_to_add;
+	void addDelta(double delta_to_add, int tid) {
+		delta[tid] += delta_to_add;
 	};
 
-	void addSum(double val_to_add) {
-		sumPrevious += val_to_add;
+	void addSum(double val_to_add, int tid) {
+		sumPrevious[tid] += val_to_add;
 	};
 
-	void reinitDelta() {
-		delta = 0;
-		deltaComputed = false;
+	void reinitDelta(int tid) {
+		delta[tid] = 0;
+		deltaComputed[tid] = false;
 	};
 
-	void reinitSum() {
-		sumPrevious = 0;
-		computed = false;
+	void reinitSum(int tid) {
+		sumPrevious[tid] = 0;
+		computed[tid] = false;
 	};
 
 };
@@ -73,7 +76,8 @@ class Bias : public Neuron {
 	 **/
 public:
 	~Bias() {};
-	double getResult() {
+	double getResult(int tid) {
+		assert(tid < OMP_NUM_THREADS);
 		return 1;
 	};
 };
@@ -84,8 +88,8 @@ class Input : public Neuron {
 	 **/
 public:
 	~Input(){};
-	double getResult() {
-		return sumPrevious;
+	double getResult(int tid) {
+		return sumPrevious[tid];
 	};
 };
 

@@ -32,53 +32,54 @@ void Network::fullLinkage(int layer1, int layer2){
 	}
 }
 
-void Network::resetSum() {
+void Network::resetSum(int tid) {
 	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
 		for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
-			(*node)->reinitSum();
+			(*node)->reinitSum(tid);
 		}
 	}
 }
 
-void Network::resetDelta() {
+void Network::resetDelta(int tid) {
 	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
 		for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
-			(*node)->reinitDelta();
+			(*node)->reinitDelta(tid);
 		}
 	}
 }
 
-void Network::compute(vector<double> &inputs) {
-	resetSum();
+void Network::compute(vector<double> &inputs, int tid) {
+	resetSum(tid);
 	int i = 0;
 	for (vector<double>::iterator input = inputs.begin(); input != inputs.end(); ++input) {
-		(neurons.at(0).at(i))->addSum(*input);
+		(neurons.at(0).at(i))->addSum(*input, tid);
 		i ++;
 	}
 	for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
-			(*link)->compute();
+			(*link)->compute(tid);
 		}
 	}
 }
 
-void Network::backLayer(double learning_rate, double regularization) {
+void Network::backLayer(double learning_rate, int tid) {
 	for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
-			(*link)->back(learning_rate, regularization);
+			(*link)->back(learning_rate, tid);
 		}
 	}
 }
 
-void Network::updateLayer() {
+void Network::updateLayer(double learning_rate, double regularization) {
 	for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
-			(*link)->update();
+			(*link)->update(learning_rate, regularization);
 		}
 	}
 }
 
 void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets) {
+	omp_set_num_threads(OMP_NUM_THREADS);
 	cout << fixed << setprecision (2);
 	double error = TOLERATE_ERROR;
 	double pasterror = 10;
@@ -86,20 +87,22 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	double regularization = 1/SIZE_BATCH;
 	int tour = 1;
 	int batch = inputs.size()/SIZE_BATCH;
+	int batch_image = inputs.size()/batch;
 
-	vector< vector<double> > inputs_studied;
-	vector< vector<int> > targets_studied;
+	vector< struct train_data > inputs_targets;
+
+	double start_time, run_time;
+	start_time = omp_get_wtime();
 
 	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour <= MAX_ITERATION) {
 		// Shuffles the dataset
-		inputs_studied.clear();
-		targets_studied.clear();
+		inputs_targets.clear();
 		vector <int> shuffle;
 		for (int i=0; i<int(inputs.size()); i++) shuffle.push_back(i);
 		random_shuffle(shuffle.begin(),shuffle.end());
 		for (vector< int >::iterator order = shuffle.begin(); order != shuffle.end(); ++order) {
-			inputs_studied.push_back(inputs.at(*order));
-			targets_studied.push_back(targets.at(*order));
+			struct train_data train = {inputs.at(*order), targets.at(*order)};
+			inputs_targets.push_back(train);
 		}
 
 		// Updates the learning rate
@@ -111,61 +114,38 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		pasterror = error;
 		error = 0;
 		int image = 0;
-		vector< vector<int> >::iterator target = targets_studied.begin();
 
 		printf("\nLearning -- %d\n", tour);
 		// Computes for each image the backpropagation
-		for (vector< vector<double> >::iterator input = inputs_studied.begin(); input != inputs_studied.end(); ++input) {
-			compute(*input);
-			vector<int>::iterator targetOut = target->begin();
-			for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
-				double delta = (*output)->getResult() - *targetOut;
-				error += 0.5*pow(delta, 2);
-				(*output)->addDelta(delta);
-				targetOut ++;
+		for (int number_batch = 0; number_batch < batch; ++number_batch) {
+			#pragma omp parallel for reduction(+:error)
+			for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*batch_image;
+			 		data < inputs_targets.begin() + (number_batch + 1)*batch_image; data++) {
+				int tid = omp_get_thread_num();
+				compute(data->input, tid);
+				vector<int>::iterator targetOut = data->target.begin();
+				for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
+					double delta = (*output)->getResult(tid) - *targetOut;
+					error += 0.5*pow(delta, 2);
+					(*output)->addDelta(delta, tid);
+					targetOut ++;
+				}
+
+				backLayer(learning_rate, tid);
+				resetDelta(tid);
+
+				image ++;
+				if (tid == 0) {
+					float p = (float)image*100/inputs_targets.size();
+					cout << "\r> " << p << "%" << flush;
+				}
 			}
-
-			backLayer(learning_rate, regularization);
-			resetDelta();
-
-			image ++;
-			target ++;
-			float p = (float)image*100/inputs_studied.size();
-			cout << "\r> " << p << "%" << flush;
-
-			// Updates if it is a batch learning
-			if (image%batch == 0) {
-				updateLayer();
-			}
+			updateLayer(learning_rate, regularization);
 		}
 		printf("\r--> %f\n", error);
 		tour++;
 	}
-}
 
-void Network::printRes() {
-	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
-		for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
-			printf("%f ", (*node)->getResult());
-		}
-		printf("\n - \n");
-	}
-}
-
-void Network::printDelta() {
-	for (vector< vector<Neuron*> >::iterator it = neurons.begin(); it != neurons.end(); ++it) {
-		for (vector<Neuron*>::iterator node = it->begin(); node != it->end(); ++node) {
-			printf("%f ", (*node)->getDelta());
-		}
-		printf("\n - \n");
-	}
-}
-
-void Network::printWeight() {
-	for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
-		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
-			printf("%f ", (*link)->getWeight());
-		}
-		printf("\n - \n");
-	}
+	run_time = omp_get_wtime() - start_time;
+  printf("\n Training in %lf seconds\n",run_time);
 }
