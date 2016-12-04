@@ -44,6 +44,20 @@ The network computes subset of the training set at each epoch, in order to be fa
 #### Regularization
 The weight is added to the loss function, in order to reduce the l2-norm of the weight.
 
+#### Parallelization
+The learning phase is parallelized on the data, ie each thread computes a certain number of images of a batch. So the number of thread has to be less then the number of images by batch.  
+
+The following graphs show the learning execution time for different neural networks, with a batch of 100 images.  
+
+For 50 hidden nodes, and 10 iterations :  
+![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/50-10-100.png)  
+
+For 500 hidden nodes and 1 iteration :  
+![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/500-1-100.png)  
+
+For 5000 hidden nodes and 1 iteration :  
+![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/5000-1-100.png)
+
 ## How to launch it ?
 ```
 make download
@@ -53,11 +67,13 @@ In order to download and extracts data. If you have not python3.5 and gunzip, pl
 ```
 make run
 ```
-To run the handwritten example with a simple neural network.
+To run the handwritten example with a simple neural network.  
 
 ## Future enhancements
-Parallelize the neural network and adapte the learning rate thanks to its number of incoming links. It would be interesting to see the impact of an evoluting regularization rate, which incresases when the neural network has good results.  
-Create evolutive neural network, and convolutional one.
+- Parallelize the computation phase in order to speed up the computation.
+- Adapte the learning rate thanks to its number of incoming links. It would be interesting to see the impact of an evoluting regularization rate, which incresases when the neural network has good results.  
+- Create evolutive neural network
+- Create convolutional one.
 
 ## Reference
 This work is based on the following paper : Efficient BackProp by Yann Lecun, Leon Bottou, Genevieve B. Orr, and Klaus-Robert Müller.
