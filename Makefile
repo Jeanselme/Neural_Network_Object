@@ -1,7 +1,8 @@
 CC = g++
 PYTHON = python3.5
-# Delete -DSTOCHASTIC  if a real gradient descent is needed
-GFLAG = -O3 -Wall -Wextra -fopenmp -DOMP_NUM_THREADS=7
+
+OMP_NUM_THREADS?=3
+GFLAG = -O3 -Wall -Wextra -fopenmp -DOMP_NUM_THREADS=$(OMP_NUM_THREADS)
 
 EXEC = handwritten_recognition
 
