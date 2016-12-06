@@ -78,17 +78,34 @@ void Network::updateLayer(double learning_rate, double regularization) {
 	}
 }
 
+void shuffleInputs(vector< struct train_data > &inputs_targets, vector< vector<double> > &inputs, vector< vector<int> > &targets) {
+	// This function shuffles the dataset
+	inputs_targets.clear();
+	vector <int> shuffle;
+	for (int i=0; i<int(inputs.size()); i++) shuffle.push_back(i);
+	random_shuffle(shuffle.begin(),shuffle.end());
+	for (vector< int >::iterator order = shuffle.begin(); order != shuffle.end(); ++order) {
+		struct train_data train = {inputs.at(*order), targets.at(*order)};
+		inputs_targets.push_back(train);
+	}
+}
+
+
 void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets) {
+	// Init for paralleliezation and displaying
 	omp_set_num_threads(OMP_NUM_THREADS);
 	cout << fixed << setprecision (2);
-	double error = TOLERATE_ERROR;
-	double pasterror = 10;
+
+	// Different varaibles necessary for backpropagation
+	double error = TOLERATE_ERROR; // Error of the iteration
+	double pasterror = 10; // Error of the last iteration
 	double learning_rate = 0.1;
 	double regularization = 1/SIZE_BATCH;
-	int tour = 1;
-	int batch = inputs.size()/SIZE_BATCH;
-	int batch_image = inputs.size()/batch;
 
+	int tour = 1;
+	int batch = inputs.size()/SIZE_BATCH; // Number of batch
+
+	// Association of input and target for supervised learning
 	vector< struct train_data > inputs_targets;
 
 	double start_time, run_time;
@@ -96,41 +113,44 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 
 	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour <= MAX_ITERATION) {
 		// Shuffles the dataset
-		inputs_targets.clear();
-		vector <int> shuffle;
-		for (int i=0; i<int(inputs.size()); i++) shuffle.push_back(i);
-		random_shuffle(shuffle.begin(),shuffle.end());
-		for (vector< int >::iterator order = shuffle.begin(); order != shuffle.end(); ++order) {
-			struct train_data train = {inputs.at(*order), targets.at(*order)};
-			inputs_targets.push_back(train);
-		}
+		shuffleInputs(inputs_targets, inputs, targets);
 
 		// Updates the learning rate
-		// TODO : Wolfe conditions
 		if (pasterror < error) {
 			learning_rate /= 2;
 		}
 
+		// Updates Error
 		pasterror = error;
 		error = 0;
+
 		int image = 0;
 
 		printf("\nLearning -- %d\n", tour);
 		// Computes for each image the backpropagation
 		for (int number_batch = 0; number_batch < batch; ++number_batch) {
+			// Parallelize the image for a batch of images
+			// Each thread will compute a part of the images batch in a "private" part
+			// of each noode, which will be merged at the end of the batch
 			#pragma omp parallel for reduction(+:error)
-			for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*batch_image;
-			 		data < inputs_targets.begin() + (number_batch + 1)*batch_image; data++) {
-				int tid = omp_get_thread_num();
+			for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*SIZE_BATCH;
+			 		data < inputs_targets.begin() + (number_batch + 1)*SIZE_BATCH; data++) {
+				int tid = omp_get_thread_num(); // Define the part in which the thread writes
 				compute(data->input, tid);
 				vector<int>::iterator targetOut = data->target.begin();
 				for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
+					// Compute the error and its derivative -> Euclidean norm
 					double delta = (*output)->getResult(tid) - *targetOut;
 					error += 0.5*pow(delta, 2);
+
+					// Add to the first (from end) hidden layer the computed derivative of error
 					(*output)->addDelta(delta, tid);
+
+					// Next target for next image
 					targetOut ++;
 				}
 
+				// BackPropagate the error
 				backLayer(learning_rate, tid);
 				resetDelta(tid);
 
@@ -140,6 +160,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 					cout << "\r> " << p << "%" << flush;
 				}
 			}
+			// Merge the different thread subgradient
 			updateLayer(learning_rate, regularization);
 		}
 		printf("\r--> %f\n", error);
