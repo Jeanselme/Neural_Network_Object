@@ -72,6 +72,8 @@ public:
 
 	void compute(vector<double> &inputs, int tid = 0);
 
+	void computeParallel(vector<double> &inputs, int tid = 0);
+	
 	void backLayer(double learning_rate, int tid);
 
 	void updateLayer(double learning_rate, double regularization);
