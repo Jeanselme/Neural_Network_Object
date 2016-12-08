@@ -90,7 +90,6 @@ void shuffleInputs(vector< struct train_data > &inputs_targets, vector< vector<d
 	}
 }
 
-
 void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets) {
 	// Init for paralleliezation and displaying
 	omp_set_num_threads(OMP_NUM_THREADS);
@@ -169,4 +168,51 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 
 	run_time = omp_get_wtime() - start_time;
   printf("\n Training in %lf seconds\n",run_time);
+}
+
+
+void  Network::save(const char* saveFile) {
+	cout << fixed << setprecision(8);
+	ofstream saver(saveFile);
+	if (saver.is_open()) {
+		// Writes number of layer
+		saver << links.size();
+		for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
+			// Writes number of link by layer
+			saver << endl << it->size() << endl;
+			for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
+				// Writes each weight
+				saver << (*link)->getWeight() << " ";
+			}
+		}
+		saver.close();
+	} else {
+		printf("[Error] Unable to save file\n");
+	}
+}
+
+void  Network::load(const char* saveFile) {
+	cout << fixed << setprecision(8);
+	ifstream loader(saveFile);
+	if (loader.is_open()) {
+		// Reads number of layer
+		double number_layer;
+		loader >> number_layer;
+		assert(number_layer == links.size());
+		for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
+			// Reads number of link by layer
+			double number_neuron;
+			loader >> number_neuron;
+			assert(number_neuron == it->size());
+			for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
+				// Reads each weight
+				double weight;
+				loader >> weight;
+				(*link)->setWeight(weight);
+			}
+		}
+		loader.close();
+	} else {
+		printf("[Error] Unable to load file\n");
+	}
 }

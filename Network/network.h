@@ -12,6 +12,7 @@
 #include <iostream>
 #include <assert.h>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
@@ -56,33 +57,44 @@ public:
 
 	vector<Neuron*> getResult();
 
+	// Adds a node to the network at the given layer
 	void addNode(Neuron* newNode, int layer);
 
+	// Adds a link between two nodes previously added in the network
 	void addLink(Neuron* n1, Neuron* n2, int layer_inf);
 
+	// Adds a node in the network
 	void addNodes(int number_of_neuron, int layer);
 
+	// Adds an input (first layer of the network)
 	void addInputs(int number_of_input);
 
+	// Fully links two layers
 	void fullLinkage(int layer1, int layer2);
 
+	// Resets all neurons
 	void resetSum(int tid);
 
+	// Resets delta (needed for backpropagation) of all neurons
 	void resetDelta(int tid);
 
+	// Computes the foreward phase
 	void compute(vector<double> &inputs, int tid = 0);
 
+	// Computes the backpropagation of a layer by updating the weight for the thread tid
 	void backLayer(double learning_rate, int tid);
 
+	// Updates the weights by summing the different values computed by threads
 	void updateLayer(double learning_rate, double regularization);
 
+	// Backprop
 	void backpropagation(vector< vector<double> > &inputs, vector< vector<int> > &targets);
 
-	void printRes();
+	// Saves all the weight of a neural network in the given file
+	void save(const char* saveFile);
 
-	void printDelta();
-
-	void printWeight();
+	// Loads a given neural network into the current one, need same structure
+	void load(const char* saveFile);
 };
 
 #endif
