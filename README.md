@@ -59,7 +59,7 @@ For 500 hidden nodes and 1 iteration :
 This configuration seems curious, it is certainly due to my cpu architecture.  
 
 For 5000 hidden nodes and 100 iteration :  
-![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/5000-100-100.png)  
+![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/5000-10-100.png)  
 This shows the interest of parallelize the neural network.  
 However it would be interesting to study it with larger batch and more numerous threads.
 
