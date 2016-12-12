@@ -48,18 +48,18 @@ The weight is added to the loss function, in order to reduce the l2-norm of the 
 The learning phase is parallelized on the data, ie each thread computes a certain number of images of a batch. So the number of thread has to be less then the number of images by batch.  
 
 The following graphs show the learning execution time for different neural networks, with a batch of 100 images.  
-Tests are realised on a Intel i7-4750HQ @ 2.00GHz x 8 wirh 16Gio of RAM.  
+Tests are realised on a Intel i7-4750HQ @ 2.00GHz x 8 (only 4 real) with 16Gio of RAM.  
 
 For 50 hidden nodes, and 10 iterations :  
 ![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/50-10-100.png)  
-The cost of parallelization is interesting for more than 6 threads.  
+The cost of parallelization is interesting for more than 2 threads.  
 
 For 500 hidden nodes and 1 iteration :  
 ![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/500-1-100.png)  
 This configuration seems curious, it is certainly due to my cpu architecture.  
 
-For 5000 hidden nodes and 1 iteration :  
-![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/5000-1-100.png)  
+For 5000 hidden nodes and 100 iteration :  
+![Result](https://raw.githubusercontent.com/Jeanselme/Neural_Network_Object/master/Images/5000-10-100.png)  
 This shows the interest of parallelize the neural network.  
 However it would be interesting to study it with larger batch and more numerous threads.
 

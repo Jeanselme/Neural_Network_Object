@@ -50,6 +50,10 @@ public:
 	double getWeight() {
 		return weight;
 	};
+
+	void setWeight(double nw) {
+		weight = nw;
+	};
 };
 
 #endif
