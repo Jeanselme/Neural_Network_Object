@@ -25,8 +25,9 @@ void Network::addInputs(int number_of_input) {
 }
 
 void Network::fullLinkage(int layer1, int layer2){
-	for (vector<Neuron*>::iterator node1 = neurons.at(layer1).begin(); node1 != neurons.at(layer1).end(); ++node1) {
-		for (vector<Neuron*>::iterator node2 = neurons.at(layer2).begin(); node2 != neurons.at(layer2).end(); ++node2) {
+	// Inverse the different loops in order to allow an easier compilation afterwards
+	for (vector<Neuron*>::iterator node2 = neurons.at(layer2).begin(); node2 != neurons.at(layer2).end(); ++node2) {
+		for (vector<Neuron*>::iterator node1 = neurons.at(layer1).begin(); node1 != neurons.at(layer1).end(); ++node1) {
 			addLink(*node1, *node2, layer1);
 		}
 	}
@@ -59,6 +60,27 @@ void Network::compute(vector<double> &inputs, int tid) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
 			(*link)->compute(tid);
 		}
+	}
+}
+
+void Network::computeParallel(vector<double> &inputs, int tid) {
+	resetSum(tid);
+	int i = 0;
+	for (vector<double>::iterator input = inputs.begin(); input != inputs.end(); ++input) {
+		(neurons.at(0).at(i))->addSum(*input, tid);
+		i ++;
+	}
+	i = 0;
+	for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
+		int len = neurons.at(i).size();
+		int nextLayer = it->size()/len;
+		#pragma omp parallel for
+		for (int j = 0; j < nextLayer; j++) {
+			for (vector<Link*>::iterator link =it->begin() + j*len; link < it->begin() + (j+1)*len; ++link) {
+				(*link)->compute(tid);
+			}
+		}
+		i++;
 	}
 }
 
@@ -126,42 +148,53 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		int image = 0;
 
 		printf("\nLearning -- %d\n", tour);
-		// Computes for each image the backpropagation
-		for (int number_batch = 0; number_batch < batch; ++number_batch) {
-			// Parallelize the image for a batch of images
-			// Each thread will compute a part of the images batch in a "private" part
-			// of each noode, which will be merged at the end of the batch
-			#pragma omp parallel for reduction(+:error)
-			for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*SIZE_BATCH;
-			 		data < inputs_targets.begin() + (number_batch + 1)*SIZE_BATCH; data++) {
-				int tid = omp_get_thread_num(); // Define the part in which the thread writes
-				compute(data->input, tid);
-				vector<int>::iterator targetOut = data->target.begin();
-				for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
-					// Compute the error and its derivative -> Euclidean norm
-					double delta = (*output)->getResult(tid) - *targetOut;
-					error += 0.5*pow(delta, 2);
 
-					// Add to the first (from end) hidden layer the computed derivative of error
-					(*output)->addDelta(delta, tid);
+		// Pragma outside in order to avoid to reinit the different threads
+		#pragma omp parallel
+		{
+			// Computes for each image the backpropagation
+			for (int number_batch = 0; number_batch < batch; ++number_batch) {
+				// Parallelize the image for a batch of images
+				// Each thread will compute a part of the images batch in a "private" part
+				// of each noode, which will be merged at the end of the batch
+				#pragma omp for reduction(+:error)
+				for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*SIZE_BATCH;
+						data < inputs_targets.begin() + (number_batch + 1)*SIZE_BATCH; data++) {
+					int tid = omp_get_thread_num(); // Define the part in which the thread writes
+					compute(data->input, tid);
+					vector<int>::iterator targetOut = data->target.begin();
+					for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
+						// Compute the error and its derivative -> Euclidean norm
+						double delta = (*output)->getResult(tid) - *targetOut;
+						error += 0.5*pow(delta, 2);
 
-					// Next target for next image
-					targetOut ++;
+						// Add to the first (from end) hidden layer the computed derivative of error
+						(*output)->addDelta(delta, tid);
+
+						// Next target for next image
+						targetOut ++;
+					}
+
+					// BackPropagate the error
+					backLayer(learning_rate, tid);
+					resetDelta(tid);
+
+					image ++;
+					if (tid == 0) {
+						float p = (float)image*100/inputs_targets.size();
+						cout << "\r> " << p << "%" << flush;
+					}
 				}
 
-				// BackPropagate the error
-				backLayer(learning_rate, tid);
-				resetDelta(tid);
+				// Wait for threads end of computing their part
+				#pragma omp barrier
 
-				image ++;
-				if (tid == 0) {
-					float p = (float)image*100/inputs_targets.size();
-					cout << "\r> " << p << "%" << flush;
-				}
+				// Merge the different thread subgradient
+				#pragma omp single
+				updateLayer(learning_rate, regularization);
 			}
-			// Merge the different thread subgradient
-			updateLayer(learning_rate, regularization);
 		}
+
 		printf("\r--> %f\n", error);
 		tour++;
 	}

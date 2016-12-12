@@ -35,9 +35,13 @@ public:
 	virtual ~Neuron() {};
 
 	virtual double getResult(int tid = 0) {
+		// Only first thread does it
 		if (!computed[tid]) {
-			result[tid] = functionSigmoid(sumPrevious[tid]);
-			computed[tid] = true;
+			#pragma omp critical
+			{
+				result[tid] = functionSigmoid(sumPrevious[tid]);
+				computed[tid] = true;
+			}
 		}
 		return result[tid];
 	};

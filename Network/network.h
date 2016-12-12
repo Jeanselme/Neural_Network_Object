@@ -81,6 +81,9 @@ public:
 	// Computes the foreward phase
 	void compute(vector<double> &inputs, int tid = 0);
 
+	// Parallel computation
+	void computeParallel(vector<double> &inputs, int tid = 0);
+
 	// Computes the backpropagation of a layer by updating the weight for the thread tid
 	void backLayer(double learning_rate, int tid);
 
