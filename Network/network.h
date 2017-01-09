@@ -17,8 +17,6 @@
 using namespace std;
 
 #define TOLERATE_ERROR 0.00001
-#define MAX_ITERATION 10
-#define SIZE_BATCH 100
 
 struct train_data {
 	vector<double> input;
@@ -85,7 +83,7 @@ public:
 	void computeParallel(vector<double> &inputs, int tid = 0);
 
 	// Computes the backpropagation of a layer by updating the weight for the thread tid
-	void backLayer(double learning_rate, int tid);
+	void backLayer(int tid);
 
 	// Updates the weights by summing the different values computed by threads
 	void updateLayer(double learning_rate, double regularization);

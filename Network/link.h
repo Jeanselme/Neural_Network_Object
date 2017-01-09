@@ -32,16 +32,16 @@ public:
 		next->addSum(weight * previous->getResult(tid), tid);
 	};
 
-	void back(double learning_rate, int tid) {
+	void back(int tid) {
 		// In order to avoid aoverfitting and too large weight, we add a regularization term
 		// This one has to be positive
-		newWeight[tid] += next->getDelta(tid) * previous->getResult(tid) * learning_rate;
+		newWeight[tid] += next->getDelta(tid) * previous->getResult(tid);
 		previous->addDelta(weight * next->getDelta(tid), tid);
 	};
 
 	void update(double learning_rate, double regularization) {
 		for (int i = 0; i < OMP_NUM_THREADS; i++) {
-			weight -= newWeight[i];
+			weight -= newWeight[i] * learning_rate;
 			newWeight[i] = 0;
 		}
 		weight -= learning_rate * regularization * weight;

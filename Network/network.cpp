@@ -84,10 +84,10 @@ void Network::computeParallel(vector<double> &inputs, int tid) {
 	}
 }
 
-void Network::backLayer(double learning_rate, int tid) {
+void Network::backLayer(int tid) {
 	for (vector< vector<Link*> >::reverse_iterator it = links.rbegin(); it != links.rend(); ++it) {
 		for (vector<Link*>::iterator link = it->begin(); link != it->end(); ++link) {
-			(*link)->back(learning_rate, tid);
+			(*link)->back(tid);
 		}
 	}
 }
@@ -120,7 +120,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	// Different varaibles necessary for backpropagation
 	double error = TOLERATE_ERROR; // Error of the iteration
 	double pasterror = 10; // Error of the last iteration
-	double learning_rate = 0.1;
+	double learning_rate = 0.001;
 	double regularization = 1/SIZE_BATCH;
 
 	int tour = 1;
@@ -129,8 +129,10 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	// Association of input and target for supervised learning
 	vector< struct train_data > inputs_targets;
 
+	#if TIME == 1
 	double start_time, run_time;
 	start_time = omp_get_wtime();
+	#endif
 
 	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour <= MAX_ITERATION) {
 		// Shuffles the dataset
@@ -145,9 +147,11 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		pasterror = error;
 		error = 0;
 
+		#if VERBOSE ==1
 		int image = 0;
 
 		printf("\nLearning -- %d\n", tour);
+		#endif
 
 		// Pragma outside in order to avoid to reinit the different threads
 		#pragma omp parallel
@@ -176,14 +180,16 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 					}
 
 					// BackPropagate the error
-					backLayer(learning_rate, tid);
+					backLayer(tid);
 					resetDelta(tid);
 
+					#if VERBOSE == 1
 					image ++;
 					if (tid == 0) {
 						float p = (float)image*100/inputs_targets.size();
 						cout << "\r> " << p << "%" << flush;
 					}
+					#endif
 				}
 
 				// Wait for threads end of computing their part
@@ -194,13 +200,15 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 				updateLayer(learning_rate, regularization);
 			}
 		}
-
-		printf("\r--> %f\n", error);
+		#if VERBOSE == 1
+		printf("\r--> %f\n", error/inputs.size());
+		#endif
 		tour++;
 	}
-
+	#if TIME == 1
 	run_time = omp_get_wtime() - start_time;
   printf("\n Training in %lf seconds\n",run_time);
+	#endif
 }
 
 
