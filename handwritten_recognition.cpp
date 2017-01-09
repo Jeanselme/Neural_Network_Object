@@ -25,7 +25,7 @@ int main() {
 	vector< vector<int> > labels;
 	string database = "Data/train-images-idx3-ubyte";
 	string labelname = "Data/train-labels-idx1-ubyte";
-  int inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
+	int inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
 
 	Network net = Network(NUMBER_LAYER);
 
@@ -45,14 +45,23 @@ int main() {
 
 	database = "Data/t10k-images-idx3-ubyte";
 	labelname = "Data/t10k-labels-idx1-ubyte";
-  inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
+	inputDimension = readMNIST(database.c_str(), labelname.c_str(), images, labels);
 
-  int correct = 0;
+	#if TIME == 1
+	double start_time, run_time;
+	start_time = omp_get_wtime();
+	#endif
+
+	int correct = 0;
 	for (uint i = 0; i < labels.size(); ++i) {
-		net.compute(images.at(i));
+		net.computeParallel(images.at(i));
 		if (indice(net.getResult(), labels.at(i))) {
 			correct ++;
 		}
 	}
+	#if TIME == 1
+	run_time = omp_get_wtime() - start_time;
+	printf("\n Testing in %lf seconds by image\n",run_time);
+	#endif
 	printf("%d / %d -> Classified\n", correct, (int) labels.size());
 }
