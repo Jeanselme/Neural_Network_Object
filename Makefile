@@ -8,9 +8,11 @@ TIME?=1
 BATCH?=100
 # Number of iterations
 MAXITER?=50
+# Number of nodes in the hidden layer
+NETWORK?=50
 #Number of threads
 OMP_NUM_THREADS?=3
-GFLAG = -O3 -Wall -Wextra -fopenmp -DOMP_NUM_THREADS=$(OMP_NUM_THREADS) -DVERBOSE=$(VERBOSE) -DTIME=$(TIME) -DSIZE_BATCH=$(BATCH) -DMAX_ITERATION=$(MAXITER)
+GFLAG = -O3 -Wall -Wextra -fopenmp -DOMP_NUM_THREADS=$(OMP_NUM_THREADS) -DVERBOSE=$(VERBOSE) -DTIME=$(TIME) -DSIZE_BATCH=$(BATCH) -DMAX_ITERATION=$(MAXITER) -DNETWORK=$(NETWORK)
 
 EXEC = handwritten_recognition
 

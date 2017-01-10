@@ -33,7 +33,7 @@ int main() {
 	Bias* b0 = new Bias();
 	net.addNode(b0,0);
 
-	net.addNodes(50,1);
+	net.addNodes(NETWORK,1);
 	net.fullLinkage(0,1);
 	Bias* b1 = new Bias();
 	net.addNode(b1,1);
