@@ -19,7 +19,7 @@ SRCEXT= $(wildcard Extraction/*.cpp)
 OBJ= $(SRCNET:%.cpp=%.o) $(SRCEXT:%.cpp=%.o) $(EXEC).o
 
 test:
-	$(PYTHON) Performances.py
+	$(PYTHON) parallelism.py
 
 download:
 	$(PYTHON) Data/download.py
