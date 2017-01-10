@@ -71,7 +71,7 @@ public:
 	void fullLinkage(int layer1, int layer2);
 
 	// Resets all neurons
-	void resetSum(int tid);
+	void resetSum(int tid = 0);
 
 	// Resets delta (needed for backpropagation) of all neurons
 	void resetDelta(int tid);
@@ -80,7 +80,7 @@ public:
 	void compute(vector<double> &inputs, int tid = 0);
 
 	// Parallel computation
-	void computeParallel(vector<double> &inputs, int tid = 0);
+	void computeParallel(vector<double> &inputs);
 
 	// Computes the backpropagation of a layer by updating the weight for the thread tid
 	void backLayer(int tid);

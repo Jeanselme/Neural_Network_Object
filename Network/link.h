@@ -28,11 +28,11 @@ public:
 		memset(newWeight, 0, OMP_NUM_THREADS);
 	};
 
-	void compute(int tid) {
+	void compute(int tid = 0) {
 		next->addSum(weight * previous->getResult(tid), tid);
 	};
 
-	void back(int tid) {
+	void back(int tid = 0) {
 		// In order to avoid aoverfitting and too large weight, we add a regularization term
 		// This one has to be positive
 		newWeight[tid] += next->getDelta(tid) * previous->getResult(tid);

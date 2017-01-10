@@ -63,24 +63,27 @@ void Network::compute(vector<double> &inputs, int tid) {
 	}
 }
 
-void Network::computeParallel(vector<double> &inputs, int tid) {
-	resetSum(tid);
+void Network::computeParallel(vector<double> &inputs) {
+	resetSum();
 	int i = 0;
 	for (vector<double>::iterator input = inputs.begin(); input != inputs.end(); ++input) {
-		(neurons.at(0).at(i))->addSum(*input, tid);
+		(neurons.at(0).at(i))->addSum(*input);
 		i ++;
 	}
-	i = 0;
-	for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
-		int len = neurons.at(i).size();
-		int nextLayer = it->size()/len;
-		#pragma omp parallel for
-		for (int j = 0; j < nextLayer; j++) {
-			for (vector<Link*>::iterator link =it->begin() + j*len; link < it->begin() + (j+1)*len; ++link) {
-				(*link)->compute(tid);
+	#pragma omp parallel private(i)
+	{
+		i = 0;
+		for (vector< vector<Link*> >::iterator it = links.begin(); it != links.end(); ++it) {
+			int len = neurons.at(i).size();
+			int nextLayer = it->size()/len;
+			#pragma omp for
+			for (int j = 0; j < nextLayer; j++) {
+				for (vector<Link*>::iterator link =it->begin() + j*len; link < it->begin() + (j+1)*len; ++link) {
+					(*link)->compute();
+				}
 			}
+			i++;
 		}
-		i++;
 	}
 }
 

@@ -18,6 +18,9 @@ SRCNET= $(wildcard Network/*.cpp)
 SRCEXT= $(wildcard Extraction/*.cpp)
 OBJ= $(SRCNET:%.cpp=%.o) $(SRCEXT:%.cpp=%.o) $(EXEC).o
 
+test:
+	$(PYTHON) Performances.py
+
 download:
 	$(PYTHON) Data/download.py
 	gunzip Data/*.gz

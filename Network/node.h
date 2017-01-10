@@ -46,7 +46,7 @@ public:
 		return result[tid];
 	};
 
-	double getDelta(int tid) {
+	double getDelta(int tid = 0) {
 		if (!deltaComputed[tid]) {
 			deltaResult[tid] = derivativeSigmoid(result[tid])*delta[tid];
 			deltaComputed[tid] = true;
@@ -54,20 +54,20 @@ public:
 		return deltaResult[tid];
 	};
 
-	void addDelta(double delta_to_add, int tid) {
+	void addDelta(double delta_to_add, int tid = 0) {
 		delta[tid] += delta_to_add;
 	};
 
-	void addSum(double val_to_add, int tid) {
+	void addSum(double val_to_add, int tid = 0) {
 		sumPrevious[tid] += val_to_add;
 	};
 
-	void reinitDelta(int tid) {
+	void reinitDelta(int tid = 0) {
 		delta[tid] = 0;
 		deltaComputed[tid] = false;
 	};
 
-	void reinitSum(int tid) {
+	void reinitSum(int tid = 0) {
 		sumPrevious[tid] = 0;
 		computed[tid] = false;
 	};
@@ -80,7 +80,7 @@ class Bias : public Neuron {
 	 **/
 public:
 	~Bias() {};
-	double getResult(int tid) {
+	double getResult(int tid = 0) {
 		assert(tid < OMP_NUM_THREADS);
 		return 1;
 	};
@@ -92,7 +92,7 @@ class Input : public Neuron {
 	 **/
 public:
 	~Input(){};
-	double getResult(int tid) {
+	double getResult(int tid = 0) {
 		return sumPrevious[tid];
 	};
 };
