@@ -163,7 +163,7 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 				// of each noode, which will be merged at the end of the batch
 				#pragma omp for reduction(+:error)
 				for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*SIZE_BATCH;
-						data < inputs_targets.begin() + (number_batch + 1)*SIZE_BATCH; data++) {
+						data < min(inputs_targets.begin() + (number_batch + 1)*SIZE_BATCH, inputs_targets.end()); data++) {
 					int tid = omp_get_thread_num(); // Define the part in which the thread writes
 					compute(data->input, tid);
 					vector<int>::iterator targetOut = data->target.begin();
