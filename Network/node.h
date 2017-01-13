@@ -5,6 +5,11 @@
 #include <assert.h>
 #include <string.h>
 #include <omp.h>
+#include <vector>
+
+using namespace std;
+
+class Link;
 
 class Neuron {
 	/**
@@ -24,6 +29,9 @@ protected:
 	double deltaResult[OMP_NUM_THREADS];
 	bool deltaComputed[OMP_NUM_THREADS];
 
+	// Axion input
+	vector<Link*> previous;
+
 public:
 	Neuron() {
 		memset(sumPrevious, 0, OMP_NUM_THREADS);
@@ -34,8 +42,15 @@ public:
 
 	virtual ~Neuron() {};
 
+	void addPrevious(Link* link) {
+		previous.push_back(link);
+	};
+
+	vector<Link*> getPrevious() {
+		return previous;
+	}
+
 	virtual double getResult(int tid = 0) {
-		// Only first thread does it
 		if (!computed[tid]) {
 			#pragma omp critical
 			{
