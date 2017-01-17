@@ -12,7 +12,8 @@ MAXITER?=50
 NETWORK?=50
 #Number of threads
 OMP_NUM_THREADS?=3
-GFLAG = -O3 -Wall -Wextra -fopenmp -DOMP_NUM_THREADS=$(OMP_NUM_THREADS) -DVERBOSE=$(VERBOSE) -DTIME=$(TIME) -DSIZE_BATCH=$(BATCH) -DMAX_ITERATION=$(MAXITER) -DNETWORK=$(NETWORK)
+VARIABLES = -DOMP_NUM_THREADS=$(OMP_NUM_THREADS) -DVERBOSE=$(VERBOSE) -DTIME=$(TIME) -DSIZE_BATCH=$(BATCH) -DMAX_ITERATION=$(MAXITER) -DNETWORK=$(NETWORK)
+GFLAG = -O3 -Wall -Wextra -fopenmp
 
 EXEC = handwritten_recognition
 
@@ -34,7 +35,7 @@ run: all
 	./$(EXEC)
 
 %.o: %.cpp
-	$(CC) -c $<  $(GFLAG) -o $@
+	$(CC) -c $<  $(GFLAG) $(VARIABLES) -o $@
 
 clean:
 	rm -f $(OBJ) $(EXEC)

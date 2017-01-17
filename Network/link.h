@@ -40,11 +40,12 @@ public:
 	};
 
 	void update(double learning_rate, double regularization) {
+		double update = 0;
 		for (int i = 0; i < OMP_NUM_THREADS; i++) {
-			weight -= newWeight[i] * learning_rate;
+			update += newWeight[i];
 			newWeight[i] = 0;
 		}
-		weight -= learning_rate * regularization * weight;
+		weight -= learning_rate * (regularization * weight + update);
 	};
 
 	double getWeight() {

@@ -158,6 +158,8 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 		// Pragma outside in order to avoid to reinit the different threads
 		#pragma omp parallel
 		{
+			int tid = omp_get_thread_num(); // Define the part in which the thread writes
+
 			// Computes for each image the backpropagation
 			for (int number_batch = 0; number_batch < batch; ++number_batch) {
 				// Parallelize the image for a batch of images
@@ -166,7 +168,6 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 				#pragma omp for reduction(+:error)
 				for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*SIZE_BATCH;
 						data < min(inputs_targets.begin() + (number_batch + 1)*SIZE_BATCH, inputs_targets.end()); data++) {
-					int tid = omp_get_thread_num(); // Define the part in which the thread writes
 					compute(data->input, tid);
 					vector<int>::iterator targetOut = data->target.begin();
 					for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
@@ -193,9 +194,6 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 					}
 					#endif
 				}
-
-				// Wait for threads end of computing their part
-				#pragma omp barrier
 
 				// Merge the different thread subgradient
 				#pragma omp single
