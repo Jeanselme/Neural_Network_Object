@@ -102,14 +102,16 @@ void Network::updateLayer(double learning_rate, double regularization) {
 	}
 }
 
-void shuffleInputs(vector< struct train_data > &inputs_targets, vector< vector<double> > &inputs, vector< vector<int> > &targets) {
-	// This function shuffles the dataset
+void shuffleInputs(vector< struct train_data > &inputs_targets, vector< vector<double> > &inputs, vector< vector<int> > &targets, int tid) {
+	// This function shuffle the part of the dataset of the current thread
 	inputs_targets.clear();
 	vector <int> shuffle;
-	for (int i=0; i<int(inputs.size()); i++) shuffle.push_back(i);
+	int size = int(inputs.size())/OMP_NUM_THREADS;
+	for (int i=0; i<size; i++) shuffle.push_back(i);
 	random_shuffle(shuffle.begin(),shuffle.end());
 	for (vector< int >::iterator order = shuffle.begin(); order != shuffle.end(); ++order) {
-		struct train_data train = {inputs.at(*order), targets.at(*order)};
+		int index = min(int(inputs.size()),tid*size + *order);
+		struct train_data train = {inputs.at(index), targets.at(index)};
 		inputs_targets.push_back(train);
 	}
 }
@@ -125,55 +127,67 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 	double learning_rate = 0.001;
 	double regularization = 1/SIZE_BATCH;
 
+	double errorThread[OMP_NUM_THREADS];
+	memset(errorThread, 0, OMP_NUM_THREADS);
+
 	int tour = 1;
 	int batch = inputs.size()/SIZE_BATCH; // Number of batch
 
-	// Association of input and target for supervised learning
-	vector< struct train_data > inputs_targets;
+	#if VERBOSE ==1
+	int image = 0;
+	#endif
 
 	#if TIME == 1
 	double start_time, run_time;
 	start_time = omp_get_wtime();
 	#endif
 
-	while (fabs(error - pasterror) >= TOLERATE_ERROR && tour <= MAX_ITERATION) {
-		// Shuffles the dataset
-		shuffleInputs(inputs_targets, inputs, targets);
+	// Pragma outside in order to avoid to reinit the different threads
+	#pragma omp parallel
+	{
+		int tid = omp_get_thread_num(); // Define the part in which the thread writes
 
-		// Updates the learning rate
-		if (pasterror < error) {
-			learning_rate /= 2;
-		}
+		// Association of input and target for supervised learning
+		vector< struct train_data > inputs_targets;
 
-		// Updates Error
-		pasterror = error;
-		error = 0;
+		while (fabs(error - pasterror) >= TOLERATE_ERROR && tour <= MAX_ITERATION) {
+			// Shuffles the dataset for the current thread
+			shuffleInputs(inputs_targets, inputs, targets, tid);
 
-		#if VERBOSE ==1
-		int image = 0;
+			// Updates the learning rate
+			#pragma omp single
+			{
+				if (pasterror < error) {
+					learning_rate /= 2;
+				}
+				// Updates Error
+				pasterror = error;
 
-		printf("\nLearning -- %d\n", tour);
-		#endif
-
-		// Pragma outside in order to avoid to reinit the different threads
-		#pragma omp parallel
-		{
-			int tid = omp_get_thread_num(); // Define the part in which the thread writes
+				#if VERBOSE ==1
+				// Reinit number of image
+				image = 0;
+				printf("\nLearning -- %d\n", tour);
+				#endif
+			}
 
 			// Computes for each image the backpropagation
 			for (int number_batch = 0; number_batch < batch; ++number_batch) {
 				// Parallelize the image for a batch of images
 				// Each thread will compute a part of the images batch in a "private" part
-				// of each noode, which will be merged at the end of the batch
-				#pragma omp for reduction(+:error)
-				for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*SIZE_BATCH;
-						data < min(inputs_targets.begin() + (number_batch + 1)*SIZE_BATCH, inputs_targets.end()); data++) {
+				// of each node, which will be merged at the end of the batch
+
+				// Each thread computes on its own inputs_targets in order to take into
+				// account the locality of data
+				for (vector< struct train_data >::iterator data = inputs_targets.begin() + number_batch*SIZE_BATCH/OMP_NUM_THREADS;
+						data < min(inputs_targets.begin() + (number_batch + 1)*SIZE_BATCH/OMP_NUM_THREADS, inputs_targets.end()); data++) {
 					compute(data->input, tid);
 					vector<int>::iterator targetOut = data->target.begin();
 					for (vector< Neuron* >::iterator output = neurons.back().begin(); output != neurons.back().end(); ++output) {
 						// Compute the error and its derivative -> Euclidean norm
 						double delta = (*output)->getResult(tid) - *targetOut;
-						error += 0.5*pow(delta, 2);
+
+						// Updaytes its local error
+						errorThread[tid] += 0.5*pow(delta, 2);
 
 						// Add to the first (from end) hidden layer the computed derivative of error
 						(*output)->addDelta(delta, tid);
@@ -187,23 +201,36 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 					resetDelta(tid);
 
 					#if VERBOSE == 1
-					image ++;
 					if (tid == 0) {
+						image ++;
 						float p = (float)image*100/inputs_targets.size();
 						cout << "\r> " << p << "%" << flush;
 					}
 					#endif
 				}
+				// Wait for all the threads have computed their part
+				#pragma omp barrier
 
 				// Merge the different thread subgradient
 				#pragma omp single
 				updateLayer(learning_rate, regularization);
 			}
+
+			#pragma omp single
+			{
+				error = 0;
+				// Merge the different computed errors
+				for (int k = 0; k < OMP_NUM_THREADS; k++) {
+					error += errorThread[k];
+					errorThread[k] = 0;
+				}
+				#if VERBOSE == 1
+				printf("\r--> %f\n", error/inputs.size());
+				#endif
+			}
+			#pragma omp single
+			tour++;
 		}
-		#if VERBOSE == 1
-		printf("\r--> %f\n", error/inputs.size());
-		#endif
-		tour++;
 	}
 	#if TIME == 1
 	run_time = omp_get_wtime() - start_time;
