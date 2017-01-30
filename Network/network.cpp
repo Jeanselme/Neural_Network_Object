@@ -227,9 +227,9 @@ void Network::backpropagation(vector< vector<double> > &inputs, vector< vector<i
 				#if VERBOSE == 1
 				printf("\r--> %f\n", error/inputs.size());
 				#endif
-			}
-			#pragma omp single
-			tour++;
+
+				tour++;
+			}			
 		}
 	}
 	#if TIME == 1
